@@ -64,7 +64,6 @@
             android:textColor="@color/input_register"
             android:textColorHint="@color/input_register_hint"/>
 
-        <!-- Login Button -->
         <Button
             android:id="@+id/btnRegister"
             android:layout_width="fill_parent"
@@ -74,7 +73,6 @@
             android:text="@string/btn_register"
             android:textColor="@color/white" />
 
-        <!-- Link to Login Screen -->
 
     </LinearLayout>
 

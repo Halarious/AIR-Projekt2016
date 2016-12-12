@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content">
+
+    <include
+        android:id="@+id/toolbar"
+        layout="@layout/toolbar_main"/>
+    <fragment
+        android:name="hr.foi.air.international.servemepls.views.TestListFragment"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_marginBottom="100px"
+        android:layout_below="@+id/toolbar"
+        />
+
+    <Button
+        android:id ="@+id/button_new_order"
+        android:layout_alignParentRight="true"
+        android:layout_alignParentBottom="true"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="0px"
+        android:layout_marginRight="10px"
+        android:background="@drawable/button_new_order"
+        android:text="+"
+        />
+
+</RelativeLayout>

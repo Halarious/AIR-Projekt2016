@@ -21,7 +21,6 @@ import org.json.JSONObject;
 import java.util.HashMap;
 import java.util.Map;
 
-import hr.foi.air.international.servemepls.MainActivity;
 import hr.foi.air.international.servemepls.R;
 import hr.foi.air.international.servemepls.controllers.AppConfig;
 import hr.foi.air.international.servemepls.controllers.AppController;
