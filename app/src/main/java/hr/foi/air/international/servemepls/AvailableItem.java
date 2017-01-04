@@ -11,7 +11,7 @@ public class AvailableItem
 
     }
 
-    public AvailableItem(String label, String description, int category)
+    public AvailableItem(String label, int category)
     {
         this.label    = label;
         this.category = category;
