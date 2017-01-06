@@ -11,7 +11,7 @@ import android.widget.TextView;
 
 import java.util.ArrayList;
 
-import hr.foi.air.international.servemepls.AvailableItem;
+import hr.foi.air.international.servemepls.models.AvailableItem;
 import hr.foi.air.international.servemepls.R;
 
 public class AddOrderArrayAdapter extends ArrayAdapter

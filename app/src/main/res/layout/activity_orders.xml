@@ -6,13 +6,12 @@
     <include
         android:id="@+id/toolbar"
         layout="@layout/toolbar_main"/>
-    <fragment
-        android:id="@+id/ordersListFragment"
-        android:name="hr.foi.air.international.servemepls.views.TestListFragment"
+    <FrameLayout
+        android:id="@+id/fragment_container"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_marginBottom="100px"
-        android:layout_below="@+id/toolbar"
-        />
+        android:layout_below="@+id/toolbar"/>
+
 
 </RelativeLayout>

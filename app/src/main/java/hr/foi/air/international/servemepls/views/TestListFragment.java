@@ -6,8 +6,10 @@ import android.support.annotation.Nullable;
 import android.support.v4.app.DialogFragment;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
-import android.support.v4.app.ListFragment;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
@@ -16,26 +18,61 @@ import android.widget.ListView;
 
 import java.util.ArrayList;
 
-import hr.foi.air.international.servemepls.ListitemOrderItem;
-import hr.foi.air.international.servemepls.Order;
+import hr.foi.air.international.servemepls.models.ListitemOrderItem;
+import hr.foi.air.international.servemepls.models.Order;
 import hr.foi.air.international.servemepls.R;
 import hr.foi.air.international.servemepls.helpers.OrdersArrayAdapter;
+import hr.foi.air.international.servemepls.helpers.SessionManager;
 
 public class TestListFragment extends Fragment
                               implements AddOrderDialogFragment.AddOrderDialogListener,
                                          OrdersArrayAdapter.OrdersArrayAdapterListener
 {
     //todo: Maybe not necessary, check this
-    private FragmentActivity myContext;
-    private ArrayList<Order> orders = new ArrayList<Order>();
-
-    public OrdersArrayAdapter adapter;
+    private FragmentActivity    context;
+    private OrdersArrayAdapter  adapter;
+    private Menu                actionBar;
 
     @Override
     public void onAttach(Context context)
     {
-        myContext = (FragmentActivity) context;
+        this.context = (FragmentActivity) context;
         super.onAttach(context);
+    }
+
+    @Override
+    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater)
+    {
+        this.actionBar = menu;
+        inflater.inflate(R.menu.menu_fragment, menu);
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item)
+    {
+        switch (item.getItemId())
+        {
+            case R.id.action_add:
+                showAddOrderDialogFragment(false);
+                return true;
+            case R.id.action_edit:
+                showAddOrderDialogFragment(true);
+                return true;
+            case R.id.action_delete:
+                adapter.removeSelectedItem();
+                return true;
+            default:
+                return super.onOptionsItemSelected(item);
+        }
+    }
+
+    @Override
+    public void onCreate(@Nullable Bundle savedInstanceState)
+    {
+        super.onCreate(savedInstanceState);
+
+        SessionManager session = new SessionManager(context);
+        setHasOptionsMenu(true);
     }
 
     @Override
@@ -55,7 +92,7 @@ public class TestListFragment extends Fragment
             @Override
             public void onClick(View view)
             {
-                showAddOrderDialogFragment();
+                showAddOrderDialogFragment(false);
             }
         });
 
@@ -63,56 +100,69 @@ public class TestListFragment extends Fragment
         ArrayList<ListitemOrderItem> sampleOrder = new ArrayList<ListitemOrderItem>();
         sampleOrder.add(new ListitemOrderItem("Drinks", "Booze", 2));
         sampleOrder.add(new ListitemOrderItem("Food"  , "Grub" , 5));
-        orders.add(new Order(sampleOrder));
 
         final ListView listView = (ListView) getView().findViewById(R.id.orders_list);
-        adapter = new OrdersArrayAdapter(getActivity(), orders, this);
+        adapter = new OrdersArrayAdapter(getActivity(), new ArrayList<Order>(), this);
+        adapter.addItem(new Order(sampleOrder));
         listView.setAdapter(adapter);
         listView.setOnItemClickListener(new AdapterView.OnItemClickListener()
         {
             @Override
-            public void onItemClick(AdapterView<?> adapterView, View view, int i, long l)
+            public void onItemClick(AdapterView<?> adapterView, View view, int index, long l)
             {
-                Order selectedOrder = (Order)adapterView.getItemAtPosition(i);
-                showAddOrderDialogFragment(selectedOrder);
+                adapter.setSelectedItem(index, view);
             }
         });
+
     }
 
     @Override
     public void onDialogPositiveClick(DialogFragment dialog,
-                                      ArrayList<ListitemOrderItem> newOrder)
+                                      ArrayList<ListitemOrderItem> newOrder,
+                                      int orderIndex)
     {
         //todo: The order is set and confirmed, send this to the server.
-        orders.add(new Order(newOrder));
-        adapter.notifyDataSetChanged();
+        Order order = new Order(newOrder);
+        if(orderIndex != -1)
+            adapter.updateItem(orderIndex, order);
+        else
+        {
+            adapter.addItem(order);
+        }
     }
 
     @Override
-    public void onRemoveButton(int orderPosition)
+    public void onSelect()
     {
-        orders.remove(orderPosition);
-        adapter.notifyDataSetChanged();
+        actionBar.findItem(R.id.action_edit).setVisible(true);
+        actionBar.findItem(R.id.action_delete).setVisible(true);
     }
 
-    public void showAddOrderDialogFragment()
+    @Override
+    public void onDeselect()
     {
-        //todo: Get data from local sqlite db(??) and send it to the fragment
-        //The question is when to update the database/sync with the server
-        DialogFragment dialog = new AddOrderDialogFragment();
-        dialog.setTargetFragment(this, 0);
-        dialog.show(getFragmentManager(), "AddOrderDialogFragment");
+        actionBar.findItem(R.id.action_edit).setVisible(false);
+        actionBar.findItem(R.id.action_delete).setVisible(false);
     }
 
-    public void showAddOrderDialogFragment(Order order)
+    @Override
+    public void onRemove()
     {
+
+    }
+
+    public void showAddOrderDialogFragment(boolean edit)
+    {
+        DialogFragment dialog = new AddOrderDialogFragment();
+        if(edit)
+        {
+            Bundle bundle = new Bundle();
+            bundle.putInt("OrderIndex", adapter.getSelectedItemIndex());
+            bundle.putSerializable("Order", (Order)adapter.getSelectedItem());
+            dialog.setArguments(bundle);
+        }
         //todo: Get data from local sqlite db(??) and send it to the fragment
         //The question is when to update the database/sync with the server
-        Bundle bundle = new Bundle();
-        bundle.putSerializable("SampleKey", order);
-
-        DialogFragment dialog = new AddOrderDialogFragment();
-        dialog.setArguments(bundle);
         dialog.setTargetFragment(this, 0);
         dialog.show(getFragmentManager(), "AddOrderDialogFragment");
     }

@@ -5,10 +5,13 @@
     <item
         android:id="@+id/action_favorite"
         android:title="@string/placeholder"
+        android:icon="@drawable/ic_star_black_24dp"
+        android:orderInCategory="20"
         app:showAsAction="ifRoom"/>
 
     <item android:id="@+id/action_settings"
           android:title="@string/action_settings"
+          android:orderInCategory="29"
           app:showAsAction="never"/>
 
 </menu>

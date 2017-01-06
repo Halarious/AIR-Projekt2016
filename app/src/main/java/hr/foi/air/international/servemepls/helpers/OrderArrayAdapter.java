@@ -12,7 +12,7 @@ import android.widget.TextView;
 
 import java.util.ArrayList;
 
-import hr.foi.air.international.servemepls.ListitemOrderItem;
+import hr.foi.air.international.servemepls.models.ListitemOrderItem;
 import hr.foi.air.international.servemepls.R;
 
 public class OrderArrayAdapter extends ArrayAdapter<ListitemOrderItem>
@@ -25,6 +25,7 @@ public class OrderArrayAdapter extends ArrayAdapter<ListitemOrderItem>
     private Context context;
     private OrderArrayAdapterListener listener;
     private ArrayList<ListitemOrderItem> data;
+    private OrderArrayAdapterListener ordersArrayAdapterListener;
 
     public OrderArrayAdapter(Context context, OrderArrayAdapterListener listener,
                              ArrayList<ListitemOrderItem> data)

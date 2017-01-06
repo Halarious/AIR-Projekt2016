@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+                android:background="@drawable/bg_color"
                 android:descendantFocusability="blocksDescendants"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -28,7 +29,7 @@
         android:layout_toLeftOf="@+id/button_remove"
         android:layout_marginRight="10px"
         android:text="x3"
-        android:textSize="20px" ><!-- @+id/item_count -->
+        android:textSize="20px">
     </TextView>
 
     <Button

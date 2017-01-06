@@ -1,4 +1,4 @@
-package hr.foi.air.international.servemepls;
+package hr.foi.air.international.servemepls.models;
 
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -11,4 +11,5 @@ public class Order implements Serializable
     {
         this.orderItems = orderItems;
     }
+
 }
