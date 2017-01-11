@@ -5,7 +5,7 @@ import android.view.MenuItem;
 
 import hr.foi.air.international.servemepls.R;
 
-public class TestListFragmentAdmin extends TestListFragment
+public class ServiceListFragmentAdmin extends ServiceListFragment
 {
     @Override
     public boolean onOptionsItemSelected(MenuItem item)

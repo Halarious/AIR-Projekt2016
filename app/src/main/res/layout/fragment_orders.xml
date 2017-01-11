@@ -11,13 +11,12 @@
               android:layout_height="match_parent"
               android:layout_above="@+id/button_new_order"
               android:background="#00FF00"
-              android:layout_weight="1"
               android:drawSelectorOnTop="false"
               />
 
     <Button
         android:id ="@+id/button_new_order"
-        android:layout_alignParentRight="true"
+        android:layout_alignParentEnd="true"
         android:layout_alignParentBottom="true"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"

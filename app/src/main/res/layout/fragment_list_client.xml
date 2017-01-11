@@ -2,14 +2,25 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:paddingLeft="8dp"
-                android:paddingRight="8dp">
+                android:paddingLeft="1dp"
+                android:paddingRight="1dp"
+                android:background="#2F4F4F">
 
     <ListView android:id="@+id/orders_list"
+              android:descendantFocusability="blocksDescendants"
               android:layout_width="match_parent"
               android:layout_height="match_parent"
-              android:background="#0000FF"
+              android:layout_above="@+id/client_order_button"
+              android:background="#1F3F3F"
               android:drawSelectorOnTop="false"
+        />
+
+    <Button
+        android:id="@+id/client_order_button"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_centerHorizontal="true"
         />
 
 </RelativeLayout>

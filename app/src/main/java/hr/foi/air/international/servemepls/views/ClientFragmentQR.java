@@ -20,13 +20,27 @@ import hr.foi.air.international.servemepls.R;
 
 public class ClientFragmentQR extends Fragment
 {
+    public interface ClientFragmentQRListener
+    {
+        public void onQRScanned();
+    }
+
     private Context context;
     private Menu    actionBar;
+    private ClientFragmentQRListener clientFragmentQRListener;
 
     @Override
     public void onAttach(Context context)
     {
         this.context = context;
+        try
+        {
+            clientFragmentQRListener = (ClientFragmentQRListener) context;
+        } catch (ClassCastException e)
+        {
+            throw new ClassCastException(context.toString()
+                    + " must implement NoticeDialogListener");
+        }
         super.onAttach(context);
     }
 
@@ -82,6 +96,7 @@ public class ClientFragmentQR extends Fragment
             } else
             {
                 Toast.makeText(context, "Scanned: " + result.getContents(), Toast.LENGTH_LONG).show();
+                clientFragmentQRListener.onQRScanned();
             }
         } else {
             super.onActivityResult(requestCode, resultCode, data);

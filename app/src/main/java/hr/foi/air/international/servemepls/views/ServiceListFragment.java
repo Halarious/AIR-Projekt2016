@@ -24,7 +24,7 @@ import hr.foi.air.international.servemepls.R;
 import hr.foi.air.international.servemepls.helpers.OrdersArrayAdapter;
 import hr.foi.air.international.servemepls.helpers.SessionManager;
 
-abstract public class TestListFragment extends Fragment
+abstract public class ServiceListFragment extends Fragment
                               implements AddOrderDialogFragment.AddOrderDialogListener,
                                          OrdersArrayAdapter.OrdersArrayAdapterListener
 {
