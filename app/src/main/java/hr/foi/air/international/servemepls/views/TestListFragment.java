@@ -24,14 +24,15 @@ import hr.foi.air.international.servemepls.R;
 import hr.foi.air.international.servemepls.helpers.OrdersArrayAdapter;
 import hr.foi.air.international.servemepls.helpers.SessionManager;
 
-public class TestListFragment extends Fragment
+abstract public class TestListFragment extends Fragment
                               implements AddOrderDialogFragment.AddOrderDialogListener,
                                          OrdersArrayAdapter.OrdersArrayAdapterListener
 {
     //todo: Maybe not necessary, check this
-    private FragmentActivity    context;
-    private OrdersArrayAdapter  adapter;
-    private Menu                actionBar;
+    FragmentActivity    context;
+    OrdersArrayAdapter  adapter;
+    Menu                actionBar;
+    SessionManager      session;
 
     @Override
     public void onAttach(Context context)
@@ -55,11 +56,9 @@ public class TestListFragment extends Fragment
             case R.id.action_add:
                 showAddOrderDialogFragment(false);
                 return true;
-            case R.id.action_edit:
-                showAddOrderDialogFragment(true);
-                return true;
-            case R.id.action_delete:
-                adapter.removeSelectedItem();
+            case R.id.action_logout:
+                session.setLogin(false);
+                //todo: Refresh or simply redirect
                 return true;
             default:
                 return super.onOptionsItemSelected(item);
@@ -71,7 +70,7 @@ public class TestListFragment extends Fragment
     {
         super.onCreate(savedInstanceState);
 
-        SessionManager session = new SessionManager(context);
+        session = new SessionManager(context);
         setHasOptionsMenu(true);
     }
 
@@ -86,6 +85,11 @@ public class TestListFragment extends Fragment
     {
         super.onActivityCreated(savedInstanceState);
 
+        //todo: Fetch data from sqlite database(internal)
+        ArrayList<ListitemOrderItem> sampleOrder = new ArrayList<ListitemOrderItem>();
+        sampleOrder.add(new ListitemOrderItem("Drinks", "Booze", 2));
+        sampleOrder.add(new ListitemOrderItem("Food"  , "Grub" , 5));
+
         Button addOrderButton = (Button) getView().findViewById(R.id.button_new_order);
         addOrderButton.setOnClickListener(new View.OnClickListener()
         {
@@ -95,11 +99,6 @@ public class TestListFragment extends Fragment
                 showAddOrderDialogFragment(false);
             }
         });
-
-        //todo: Fetch data from sqlite database(internal)
-        ArrayList<ListitemOrderItem> sampleOrder = new ArrayList<ListitemOrderItem>();
-        sampleOrder.add(new ListitemOrderItem("Drinks", "Booze", 2));
-        sampleOrder.add(new ListitemOrderItem("Food"  , "Grub" , 5));
 
         final ListView listView = (ListView) getView().findViewById(R.id.orders_list);
         adapter = new OrdersArrayAdapter(getActivity(), new ArrayList<Order>(), this);
@@ -126,29 +125,7 @@ public class TestListFragment extends Fragment
         if(orderIndex != -1)
             adapter.updateItem(orderIndex, order);
         else
-        {
             adapter.addItem(order);
-        }
-    }
-
-    @Override
-    public void onSelect()
-    {
-        actionBar.findItem(R.id.action_edit).setVisible(true);
-        actionBar.findItem(R.id.action_delete).setVisible(true);
-    }
-
-    @Override
-    public void onDeselect()
-    {
-        actionBar.findItem(R.id.action_edit).setVisible(false);
-        actionBar.findItem(R.id.action_delete).setVisible(false);
-    }
-
-    @Override
-    public void onRemove()
-    {
-
     }
 
     public void showAddOrderDialogFragment(boolean edit)
@@ -161,8 +138,7 @@ public class TestListFragment extends Fragment
             bundle.putSerializable("Order", (Order)adapter.getSelectedItem());
             dialog.setArguments(bundle);
         }
-        //todo: Get data from local sqlite db(??) and send it to the fragment
-        //The question is when to update the database/sync with the server
+
         dialog.setTargetFragment(this, 0);
         dialog.show(getFragmentManager(), "AddOrderDialogFragment");
     }

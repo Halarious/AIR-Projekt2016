@@ -189,10 +189,7 @@ public class AddOrderDialogFragment extends DialogFragment
             @Override
             public void onClick(View view)
             {
-                if(counter > 0)
-                {
                     decrementCounter();
-                }
             }
         });
 
@@ -346,8 +343,11 @@ public class AddOrderDialogFragment extends DialogFragment
 
     public void decrementCounter()
     {
-        --counter;
-        counterText.setText(counter.toString());
+        if(counter > 0)
+        {
+            --counter;
+            counterText.setText(counter.toString());
+        }
     }
 
     public void setCounter(int count)

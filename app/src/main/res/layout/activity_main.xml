@@ -1,14 +1,16 @@
 <?xml version="1.0" encoding="utf-8"?>
-
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
-    android:id="@+id/activity_main"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    tools:context="hr.foi.air.international.servemepls.views.MainActivity">
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content">
 
     <include
+        android:id="@+id/toolbar"
         layout="@layout/toolbar_main"/>
-
+    <FrameLayout
+        android:id="@+id/fragment_container"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_marginBottom="100px"
+        android:layout_below="@+id/toolbar"/>
 
 </RelativeLayout>

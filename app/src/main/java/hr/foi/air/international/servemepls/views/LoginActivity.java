@@ -30,13 +30,13 @@ import hr.foi.air.international.servemepls.helpers.SessionManager;
 public class LoginActivity extends Activity
 {
     private static final String TAG = RegisterActivity.class.getSimpleName();
-    private Button btnLogin;
-    private Button btnLinkToRegister;
-    private EditText inputEmail;
-    private EditText inputPassword;
+    private Button         btnLogin;
+    private Button         btnLinkToRegister;
+    private EditText       inputEmail;
+    private EditText       inputPassword;
     private ProgressDialog pDialog;
     private SessionManager session;
-    private SQLiteHandler db;
+    private SQLiteHandler  db;
 
     @Override
     public void onCreate(Bundle savedInstanceState)
@@ -44,9 +44,9 @@ public class LoginActivity extends Activity
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
 
-        inputEmail = (EditText) findViewById(R.id.email);
-        inputPassword = (EditText) findViewById(R.id.password);
-        btnLogin = (Button) findViewById(R.id.btnLogin);
+        inputEmail        = (EditText) findViewById(R.id.email);
+        inputPassword     = (EditText) findViewById(R.id.password);
+        btnLogin          = (Button) findViewById(R.id.btnLogin);
         btnLinkToRegister = (Button) findViewById(R.id.btnLinkToRegisterScreen);
 
         pDialog = new ProgressDialog(this);
@@ -68,7 +68,7 @@ public class LoginActivity extends Activity
 
             public void onClick(View view)
             {
-                String email = inputEmail.getText().toString().trim();
+                String email    = inputEmail.getText().toString().trim();
                 String password = inputPassword.getText().toString().trim();
 
                 if (!email.isEmpty() && !password.isEmpty())
@@ -122,9 +122,9 @@ public class LoginActivity extends Activity
 
                         String uid = jObj.getString("uid");
 
-                        JSONObject user = jObj.getJSONObject("user");
-                        String name = user.getString("name");
-                        String email = user.getString("email");
+                        JSONObject user   = jObj.getJSONObject("user");
+                        String name       = user.getString("name");
+                        String email      = user.getString("email");
                         String created_at = user
                                 .getString("created_at");
 

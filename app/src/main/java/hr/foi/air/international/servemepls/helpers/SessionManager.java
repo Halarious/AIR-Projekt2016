@@ -8,7 +8,7 @@ public class SessionManager
 {
     private static String TAG = SessionManager.class.getSimpleName();
 
-    SharedPreferences pref;
+    SharedPreferences        preferences;
     SharedPreferences.Editor editor;
     Context context;
 
@@ -19,14 +19,13 @@ public class SessionManager
 
     public SessionManager(Context context)
     {
-        this.context = context;
-        pref = context.getSharedPreferences(PREF_NAME, PRIVATE_MODE);
-        editor = pref.edit();
+        this.context  = context;
+        preferences   = context.getSharedPreferences(PREF_NAME, PRIVATE_MODE);
+        editor        = preferences.edit();
     }
 
     public void setLogin(boolean isLoggedIn)
     {
-
         editor.putBoolean(KEY_IS_LOGGEDIN, isLoggedIn);
         editor.commit();
         Log.d(TAG, "User login session modified!");
@@ -34,6 +33,6 @@ public class SessionManager
 
     public boolean isLoggedIn()
     {
-        return pref.getBoolean(KEY_IS_LOGGEDIN, false);
+        return preferences.getBoolean(KEY_IS_LOGGEDIN, false);
     }
 }

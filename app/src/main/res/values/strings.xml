@@ -20,4 +20,5 @@
 
     <string name="spinner_no_selection">&lt;No selection&gt;</string>
 
+    <string name="fragment_client_ScanPrompt">Scan table QR code</string>
 </resources>
