@@ -118,17 +118,22 @@ public class LoginActivity extends Activity
 
                     if (!error)
                     {
-                        session.setLogin(true);
-
                         String uid = jObj.getString("uid");
 
                         JSONObject user   = jObj.getJSONObject("user");
                         String name       = user.getString("name");
                         String email      = user.getString("email");
+                        String role       = user.getString("role");
                         String created_at = user
                                 .getString("created_at");
 
-                        db.addUser(name, email, uid, created_at);
+                        db.addUser(name, email, role, uid, created_at);
+
+                        session.setUID(uid);
+                        if(role.equals("Privileged"))
+                            session.setLogin(true, true);
+                        else
+                            session.setLogin(true, false);
 
                         Intent intent = new Intent(LoginActivity.this,
                                 MainActivity.class);
@@ -145,7 +150,8 @@ public class LoginActivity extends Activity
                 catch (JSONException e)
                 {
                     e.printStackTrace();
-                    Toast.makeText(getApplicationContext(), "Json error: " + e.getMessage(), Toast.LENGTH_LONG).show();
+                    Toast.makeText(getApplicationContext(), "Json error: " + e.getMessage(),
+                                   Toast.LENGTH_LONG).show();
                 }
 
             }
@@ -166,7 +172,6 @@ public class LoginActivity extends Activity
             @Override
             protected Map<String, String> getParams()
             {
-                // Posting parameters to login url
                 Map<String, String> params = new HashMap<String, String>();
                 params.put("email", email);
                 params.put("password", password);

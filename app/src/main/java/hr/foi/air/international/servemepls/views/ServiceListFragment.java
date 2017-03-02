@@ -1,6 +1,7 @@
 package hr.foi.air.international.servemepls.views;
 
 import android.content.Context;
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.DialogFragment;
@@ -25,19 +26,36 @@ import hr.foi.air.international.servemepls.helpers.OrdersArrayAdapter;
 import hr.foi.air.international.servemepls.helpers.SessionManager;
 
 abstract public class ServiceListFragment extends Fragment
-                              implements AddOrderDialogFragment.AddOrderDialogListener,
-                                         OrdersArrayAdapter.OrdersArrayAdapterListener
+                                          implements AddOrderDialogFragment.AddOrderDialogListener,
+                                                     OrdersArrayAdapter.OrdersArrayAdapterListener
 {
+    public interface ViewOrderFragmentListener
+    {
+        void onView(int selectedIndex);
+    }
+
     //todo: Maybe not necessary, check this
     FragmentActivity    context;
     OrdersArrayAdapter  adapter;
     Menu                actionBar;
-    SessionManager      session;
+    SessionManager      sessionManager;
+
+    ViewOrderFragmentListener viewOrderFragmentListener;
 
     @Override
     public void onAttach(Context context)
     {
         this.context = (FragmentActivity) context;
+
+        try
+        {
+            viewOrderFragmentListener = (ViewOrderFragmentListener) context;
+        }
+        catch (ClassCastException exception)
+        {
+
+        }
+
         super.onAttach(context);
     }
 
@@ -56,9 +74,20 @@ abstract public class ServiceListFragment extends Fragment
             case R.id.action_add:
                 showAddOrderDialogFragment(false);
                 return true;
+            case R.id.action_view:
+                viewOrderFragmentListener.onView(adapter.getSelectedItemIndex());
+                return true;
+            case R.id.action_edit:
+                showAddOrderDialogFragment(true);
+                return true;
+            case R.id.action_delete:
+                adapter.removeSelectedItem();
+                return true;
             case R.id.action_logout:
-                session.setLogin(false);
-                //todo: Refresh or simply redirect
+                sessionManager.clearPreferences();
+                Intent intent = new Intent(context, LoginActivity.class);
+                startActivity(intent);
+                context.finish();
                 return true;
             default:
                 return super.onOptionsItemSelected(item);
@@ -70,7 +99,7 @@ abstract public class ServiceListFragment extends Fragment
     {
         super.onCreate(savedInstanceState);
 
-        session = new SessionManager(context);
+        sessionManager = new SessionManager(context);
         setHasOptionsMenu(true);
     }
 
@@ -102,7 +131,8 @@ abstract public class ServiceListFragment extends Fragment
 
         final ListView listView = (ListView) getView().findViewById(R.id.orders_list);
         adapter = new OrdersArrayAdapter(getActivity(), new ArrayList<Order>(), this);
-        adapter.addItem(new Order(sampleOrder));
+        adapter.addItem(new Order(sampleOrder, sessionManager.getUID()));
+        adapter.addItem(new Order(sampleOrder, sessionManager.getUID()));
         listView.setAdapter(adapter);
         listView.setOnItemClickListener(new AdapterView.OnItemClickListener()
         {
@@ -120,12 +150,28 @@ abstract public class ServiceListFragment extends Fragment
                                       ArrayList<ListitemOrderItem> newOrder,
                                       int orderIndex)
     {
-        //todo: The order is set and confirmed, send this to the server.
-        Order order = new Order(newOrder);
+        //todo: The order is set and confirmed, send this to the server and refresh internal db.
+        Order order = new Order(newOrder, sessionManager.getUID());
         if(orderIndex != -1)
             adapter.updateItem(orderIndex, order);
         else
             adapter.addItem(order);
+    }
+
+    @Override
+    public void onSelect()
+    {
+        actionBar.findItem(R.id.action_view).setVisible(true);
+        actionBar.findItem(R.id.action_edit).setVisible(true);
+        actionBar.findItem(R.id.action_delete).setVisible(true);
+    }
+
+    @Override
+    public void onDeselect()
+    {
+        actionBar.findItem(R.id.action_view).setVisible(true);
+        actionBar.findItem(R.id.action_edit).setVisible(false);
+        actionBar.findItem(R.id.action_delete).setVisible(false);
     }
 
     public void showAddOrderDialogFragment(boolean edit)

@@ -22,7 +22,7 @@ public class ClientFragmentQR extends Fragment
 {
     public interface ClientFragmentQRListener
     {
-        public void onQRScanned();
+        void onQRScanned(String content);
     }
 
     private Context context;
@@ -95,8 +95,9 @@ public class ClientFragmentQR extends Fragment
                 Toast.makeText(context, "Cancelled", Toast.LENGTH_LONG).show();
             } else
             {
-                Toast.makeText(context, "Scanned: " + result.getContents(), Toast.LENGTH_LONG).show();
-                clientFragmentQRListener.onQRScanned();
+                String content = result.getContents();
+                Toast.makeText(context, "Scanned: " + content, Toast.LENGTH_LONG).show();
+                clientFragmentQRListener.onQRScanned(content);
             }
         } else {
             super.onActivityResult(requestCode, resultCode, data);

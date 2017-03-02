@@ -7,6 +7,13 @@ import hr.foi.air.international.servemepls.R;
 
 public class ServiceListFragmentAdmin extends ServiceListFragment
 {
+
+    @Override
+    public void onResume()
+    {
+        super.onResume();
+    }
+
     @Override
     public boolean onOptionsItemSelected(MenuItem item)
     {
@@ -29,6 +36,7 @@ public class ServiceListFragmentAdmin extends ServiceListFragment
     @Override
     public void onSelect()
     {
+        actionBar.findItem(R.id.action_view).setVisible(true);
         actionBar.findItem(R.id.action_edit).setVisible(true);
         actionBar.findItem(R.id.action_delete).setVisible(true);
     }
@@ -36,6 +44,7 @@ public class ServiceListFragmentAdmin extends ServiceListFragment
     @Override
     public void onDeselect()
     {
+        actionBar.findItem(R.id.action_view).setVisible(false);
         actionBar.findItem(R.id.action_edit).setVisible(false);
         actionBar.findItem(R.id.action_delete).setVisible(false);
     }

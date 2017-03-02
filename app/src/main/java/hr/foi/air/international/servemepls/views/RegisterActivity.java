@@ -4,7 +4,11 @@ import android.app.Activity;
 import android.app.ProgressDialog;
 import android.content.Intent;
 import android.os.Bundle;
+import android.support.v4.app.NavUtils;
+import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.Toolbar;
 import android.util.Log;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
@@ -24,14 +28,15 @@ import java.util.HashMap;
 import java.util.Map;
 
 import hr.foi.air.international.servemepls.R;
-import hr.foi.air.international.servemepls.controllers.AppConfig;
 import hr.foi.air.international.servemepls.controllers.AppController;
 import hr.foi.air.international.servemepls.helpers.SQLiteHandler;
 import hr.foi.air.international.servemepls.helpers.SessionManager;
 
-public class RegisterActivity extends Activity
+public class RegisterActivity extends AppCompatActivity
 {
     private static final String TAG = RegisterActivity.class.getSimpleName();
+
+    private Toolbar customActionBar;
     private Button btnRegister;
     private Button btnLinkToLogin;
     private EditText inputFullName;
@@ -48,6 +53,10 @@ public class RegisterActivity extends Activity
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_register);
 
+        customActionBar = (Toolbar) findViewById(R.id.toolbar_register);
+        setSupportActionBar(customActionBar);
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+
         inputFullName = (EditText)  findViewById(R.id.name);
         inputEmail =    (EditText)  findViewById(R.id.email);
         inputPassword = (EditText)  findViewById(R.id.password);
@@ -56,31 +65,17 @@ public class RegisterActivity extends Activity
         btnLinkToLogin =(Button)    findViewById(R.id.btnLinkToLoginScreen);
 
         //Drop down menu (TODO: Pull locations from the database)
-        String[] items = new String[]{"Customer", "Employee", "Admin"};
+        String[] items = new String[]{ "Employee", "Privileged"};
         ArrayAdapter<String> adapter = new ArrayAdapter<String>(this, android.R.layout.simple_spinner_dropdown_item, items);
         inputRole.setAdapter(adapter);
 
-        // Progress dialog
         pDialog = new ProgressDialog(this);
         pDialog.setCancelable(false);
 
-        // Session manager
         session = new SessionManager(getApplicationContext());
 
-        // SQLite database handler
         db = new SQLiteHandler(getApplicationContext());
 
-        // Check if user is already logged in or not
-        if (session.isLoggedIn())
-        {
-            // User is already logged in. Take him to main activity
-            Intent intent = new Intent(RegisterActivity.this,
-                    MainActivity.class);
-            startActivity(intent);
-            finish();
-        }
-
-        // Register Button Click event
         btnRegister.setOnClickListener(new View.OnClickListener()
         {
             public void onClick(View view)
@@ -88,15 +83,19 @@ public class RegisterActivity extends Activity
                 String name =     inputFullName.getText().toString().trim();
                 String email =    inputEmail.getText().toString().trim();
                 String password = inputPassword.getText().toString().trim();
-                String role =     inputRole.getSelectedItem().toString();
+                String role =     inputRole.getSelectedItem().toString().trim();
 
-                if (!name.isEmpty() && !email.isEmpty() && !password.isEmpty())
+                if (!name.isEmpty()     &&
+                    !email.isEmpty()    &&
+                    !password.isEmpty() &&
+                    !role.isEmpty())
                 {
                     registerUser(name, email, password, role);
-                } else
+                }
+                else
                 {
                     Toast.makeText(getApplicationContext(),
-                            "Please enter your details!", Toast.LENGTH_LONG)
+                            "Please enter ALL your details!", Toast.LENGTH_LONG)
                             .show();
                 }
             }
@@ -116,10 +115,23 @@ public class RegisterActivity extends Activity
 
     }
 
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item)
+    {
+        switch (item.getItemId())
+        {
+            case android.R.id.home:
+                NavUtils.navigateUpFromSameTask(this);
+                return true;
+        }
+
+        return super.onOptionsItemSelected(item);
+    }
+
     /**
      * Function to store user in MySQL database will post params(tag, name,
      * email, password, role) to register url
-     * TODO: Role is as of yet not used, waiting for upgrade to the database
+     * TODO: Role is as of yet not used everywhere, waiting for upgrade to the database
      */
     private void registerUser(final String name, final String email,
                               final String password, final String role)
@@ -129,8 +141,9 @@ public class RegisterActivity extends Activity
         pDialog.setMessage("Registering ...");
         showDialog();
 
+        //todo: this is hardcoded because 'AppConfig.URL_REGISTER' returns null for some reason. Investigate
         StringRequest strReq = new StringRequest(Request.Method.POST,
-                AppConfig.URL_REGISTER, new Response.Listener<String>()
+                "http://192.168.12.1/android_login_api/register.php", new Response.Listener<String>()
         {
 
             @Override
@@ -145,18 +158,15 @@ public class RegisterActivity extends Activity
                     boolean error = jObj.getBoolean("error");
                     if (!error)
                     {
-                        // User successfully stored in MySQL
-                        // Now store the user in sqlite
                         String uid = jObj.getString("uid");
 
-                        JSONObject user = jObj.getJSONObject("user");
-                        String name = user.getString("name");
-                        String email = user.getString("email");
-                        String created_at = user
-                                .getString("created_at");
+                        JSONObject user   = jObj.getJSONObject("user");
+                        String name       = user.getString("name");
+                        String email      = user.getString("email");
+                        String role       = user.getString("role");
+                        String created_at = user.getString("created_at");
 
-                        // Inserting row in users table
-                        db.addUser(name, email, uid, created_at);
+                        db.addUser(name, email, role, uid, created_at);
 
                         Toast.makeText(
                                 getApplicationContext(),
@@ -170,16 +180,15 @@ public class RegisterActivity extends Activity
                                 LoginActivity.class);
                         startActivity(intent);
                         finish();
-                    } else
+                    }
+                    else
                     {
-
-                        // Error occurred in registration. Get the error
-                        // message
                         String errorMsg = jObj.getString("error_msg");
                         Toast.makeText(getApplicationContext(),
                                 errorMsg, Toast.LENGTH_LONG).show();
                     }
-                } catch (JSONException e)
+                }
+                catch (JSONException e)
                 {
                     e.printStackTrace();
                 }
@@ -202,18 +211,17 @@ public class RegisterActivity extends Activity
             @Override
             protected Map<String, String> getParams()
             {
-                // Posting params to register url
                 Map<String, String> params = new HashMap<String, String>();
-                params.put("name", name);
+                params.put("name",  name);
                 params.put("email", email);
                 params.put("password", password);
+                params.put("role",  role);
 
                 return params;
             }
 
         };
 
-        // Adding request to request queue
         AppController.getInstance().addToRequestQueue(strReq, tag_string_req);
     }
 

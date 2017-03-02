@@ -55,8 +55,6 @@ public class AvailableOrderItemsORM
     }
 
     public static ArrayList<AvailableItem> getItems(Context context)
-                                                    //ArrayList<> foodItems,
-                                                    //ArrayList<> drinkItems)
     {
         SQLiteHandler databaseWrapper = new SQLiteHandler(context);
         SQLiteDatabase database       = databaseWrapper.getReadableDatabase();

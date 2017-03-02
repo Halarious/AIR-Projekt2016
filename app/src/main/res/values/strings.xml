@@ -1,6 +1,9 @@
 <resources>
     <string name="app_name">ServeMePls</string>
 
+    <string name="drawer_open">Open navigation drawer</string>
+    <string name="drawer_close">Close navigation drawer</string>
+
     <string name="placeholder">Placeholder</string>
     <string name="action_settings">Settings</string>
 
