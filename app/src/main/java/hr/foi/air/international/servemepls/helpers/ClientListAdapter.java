@@ -10,6 +10,9 @@ import android.widget.Button;
 import android.widget.TextView;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.HashMap;
 import java.util.TreeSet;
 
 import hr.foi.air.international.servemepls.R;
@@ -18,10 +21,7 @@ import hr.foi.air.international.servemepls.models.ListitemOrderItem;
 
 public class ClientListAdapter extends ArrayAdapter<AvailableItem>
 {
-    public interface ClientListListener
-    {
-    }
-
+    //todo Move this (or more precisely read it)
     private String array[] = {"Food", "Drinks"};
 
     private static final int TYPE_ITEM = 0;
@@ -29,19 +29,36 @@ public class ClientListAdapter extends ArrayAdapter<AvailableItem>
 
     private final Context                  context;
     private final ArrayList<AvailableItem> data;
-    private       int                      itemCounts[];
+    private       HashMap<String, Integer> itemCounts;
     private       TreeSet<Integer>         categorySeperators = new TreeSet<Integer>();
-    private final ClientListListener       clientListListener;
 
-    public ClientListAdapter(Context context, ArrayList<AvailableItem> data,
-                             ClientListListener clientListListener)
+    public ClientListAdapter(Context context, ArrayList<AvailableItem> data)
     {
         super(context, R.layout.listitem_order_client, data);
 
         this.context    = context;
         this.data       = data;
-        this.itemCounts = new int[data.size()];
-        this.clientListListener = clientListListener;
+        this.itemCounts = ClientOrderHelper.getInstance().getOrder();
+
+        //todo: Super horrible, improve this (or keep it sorted beforehand somehow?)
+        Collections.sort(data, new Comparator<AvailableItem>() {
+            public int compare(AvailableItem first_operand, AvailableItem second_operand) {
+                return first_operand.category < second_operand.category ?
+                        -1 : 1;
+            }
+        });
+
+        addSeparatorItem(0, new AvailableItem());
+        for(int index = 1; index < data.size(); ++index)
+        {
+            if( ((index+1) != data.size()) &&
+                    (data.get(index).category != data.get(index+1).category)
+                    )
+            {
+                addSeparatorItem(index+1, new AvailableItem());
+                ++index;
+            }
+        }
     }
 
 
@@ -53,29 +70,26 @@ public class ClientListAdapter extends ArrayAdapter<AvailableItem>
                 .getSystemService(Context.LAYOUT_INFLATER_SERVICE);
         View rowView;
 
-        AvailableItem item = data.get(position);
+        final AvailableItem item = data.get(position);
         int type = getItemViewType(position);
         switch (type)
         {
             case TYPE_ITEM:
                 rowView = inflater.inflate(R.layout.listitem_order_client, null);
 
-                TextView label = (TextView) rowView.findViewById(R.id.list_item_client_label);
-                label.setText(item.label);
+                TextView labelView = (TextView) rowView.findViewById(R.id.list_item_client_label);
+                labelView.setText(item.label);
 
-                TextView price = (TextView) rowView.findViewById(R.id.list_item_client_price);
-                price.setText(item.price + "kn");
+                TextView priceView = (TextView) rowView.findViewById(R.id.list_item_client_price);
+                priceView.setText(item.price + "kn");
 
-                TextView count = (TextView) rowView.findViewById(R.id.client_item_count);
-                int separatorCount = 0;
-                for(Integer categorySeparatorPosition : categorySeperators)
-                {
-                    if( position < categorySeparatorPosition)
-                        break;
-                    ++separatorCount;
-                }
-                final int adjustedPosition = position - separatorCount;
-                count.setText(Integer.toString(itemCounts[adjustedPosition]));
+                TextView countView = (TextView) rowView.findViewById(R.id.client_item_count);
+                Integer count = itemCounts.get(item.label);
+                if(count != null)
+                    countView.setText(Integer.toString(count));
+                else
+                    countView.setText("0");
+
 
                 final Button decrementButton = (Button) rowView.findViewById(R.id.client_order_decrement_button);
                 decrementButton.setOnClickListener(new View.OnClickListener()
@@ -83,7 +97,7 @@ public class ClientListAdapter extends ArrayAdapter<AvailableItem>
                     @Override
                     public void onClick(View view)
                     {
-                        decrementCount(adjustedPosition );
+                        decrementCount(item.label);
                     }
                 });
                 Button incrementButton = (Button) rowView.findViewById(R.id.client_order_increment_button);
@@ -92,7 +106,7 @@ public class ClientListAdapter extends ArrayAdapter<AvailableItem>
                     @Override
                     public void onClick(View view)
                     {
-                        incrementCount(adjustedPosition );
+                        incrementCount(item.label);
                     }
                 });
                 break;
@@ -115,27 +129,26 @@ public class ClientListAdapter extends ArrayAdapter<AvailableItem>
         return categorySeperators.contains(position) ? TYPE_SEPARATOR : TYPE_ITEM;
     }
 
-    public void addSeparatorItem(final int index, final AvailableItem item) {
+    public void addSeparatorItem(final int index, final AvailableItem item)
+    {
         data.add(index, item);
         categorySeperators.add(index);
         notifyDataSetChanged();
     }
 
+    //todo: We could do this a lot faster now that we use HashMap for the counts...
     public ArrayList<ListitemOrderItem> getSelectedData()
     {
-        int separatorCount = 0;
         ArrayList<ListitemOrderItem> returnList = new ArrayList<ListitemOrderItem>();
         for(int index = 0; index < data.size(); ++index)
         {
             if (getItemViewType(index) == TYPE_SEPARATOR)
-            {
-                ++separatorCount;
                 continue;
-            }
-            int itemCount = itemCounts[index - separatorCount];
-            if(itemCount != 0)
+
+            AvailableItem item = data.get(index);
+            if(itemCounts.containsKey(item.label))
             {
-                AvailableItem item = data.get(index);
+                int itemCount      = itemCounts.get(item.label);
                 String category    = getCategoryString(item.category);
                 double price       = Double.parseDouble(item.price);
                 returnList.add( new ListitemOrderItem(category, item.label, itemCount, price) );
@@ -144,16 +157,28 @@ public class ClientListAdapter extends ArrayAdapter<AvailableItem>
         return returnList;
     }
 
-    private void incrementCount(int position)
+    private void incrementCount(String label)
     {
-        ++itemCounts[position];
+        int count = 1;
+        if(itemCounts.containsKey(label))
+        {
+            count = itemCounts.get(label) + 1;
+        }
+        itemCounts.put(label, count);
         notifyDataSetChanged();
     }
 
-    private void decrementCount(int position)
+    private void decrementCount(String label)
     {
-        if( !(itemCounts[position] <= 0) )
-            --itemCounts[position];
+        int count = 0;
+        if(itemCounts.containsKey(label))
+        {
+            count = itemCounts.get(label) - 1;
+            if(count <= 0)
+                itemCounts.remove(label);
+            else
+                itemCounts.put(label, count);
+        }
         notifyDataSetChanged();
     }
 

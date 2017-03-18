@@ -30,6 +30,11 @@
             android:name=".views.DetailedViewActivity"
             android:parentActivityName=".views.MainActivity"
         />
+        <activity android:name=".views.ServiceOrdersActivity"
+                  android:parentActivityName=".views.MainActivity"/>
+        <activity
+            android:name=".views.ClientActivity"
+        />
     </application>
 
 </manifest>

@@ -1,46 +1,35 @@
 package hr.foi.air.international.servemepls.views;
 
 import android.content.Context;
-import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
-import android.support.v4.app.DialogFragment;
 import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentActivity;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.AdapterView;
-import android.widget.Button;
-import android.widget.ListView;
+import android.widget.ExpandableListView;
 
-import java.util.ArrayList;
-
-import hr.foi.air.international.servemepls.models.ListitemOrderItem;
-import hr.foi.air.international.servemepls.models.Order;
 import hr.foi.air.international.servemepls.R;
-import hr.foi.air.international.servemepls.helpers.OrdersArrayAdapter;
+import hr.foi.air.international.servemepls.helpers.ServiceActiveOrderListAdapter;
 import hr.foi.air.international.servemepls.helpers.SessionManager;
 
-public abstract class ServiceListFragment extends Fragment
-                                          implements AddOrderDialogFragment.AddOrderDialogListener,
-                                                     OrdersArrayAdapter.OrdersArrayAdapterListener
+public class ServiceExpandableListFragment extends Fragment
 {
-    public interface ViewOrderFragmentListener
+    public interface ServiceExpandableListFragmentListener
     {
-        void onView(int selectedIndex);
+
     }
 
-    //todo: Maybe not necessary, check this
-    Context             context;
-    OrdersArrayAdapter  adapter;
-    Menu                actionBar;
-    SessionManager      sessionManager;
+    private Context             context;
+    private Menu                actionBar;
+    private SessionManager      sessionManager;
 
-    ViewOrderFragmentListener viewOrderFragmentListener;
+    private ServiceActiveOrderListAdapter         serviceActiveOrderListAdapter;
+    private ServiceExpandableListFragmentListener serviceExpandableListFragmentListener;
+
 
     @Override
     public void onAttach(Context context)
@@ -49,12 +38,13 @@ public abstract class ServiceListFragment extends Fragment
 
         try
         {
-            viewOrderFragmentListener = (ViewOrderFragmentListener) context;
+            serviceExpandableListFragmentListener
+                    = (ServiceExpandableListFragmentListener) context;
         }
         catch (ClassCastException exception)
         {
             throw new ClassCastException(context.toString()
-                    + " must implement ViewOrderFragmentListener");
+                    + " must implement ServiceExpandableListFragmentListener");
         }
 
         super.onAttach(context);
@@ -72,7 +62,9 @@ public abstract class ServiceListFragment extends Fragment
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState)
     {
-        return inflater.inflate(R.layout.fragment_orders, container, false);
+        return inflater.inflate(R.layout.fragment_service_expandable_list_view,
+                                container,
+                                false);
     }
 
     @Override
@@ -80,25 +72,12 @@ public abstract class ServiceListFragment extends Fragment
     {
         super.onActivityCreated(savedInstanceState);
 
-        //todo: Fetch data from sqlite database(internal)
-        ArrayList<ListitemOrderItem> sampleOrder = new ArrayList<ListitemOrderItem>();
-        sampleOrder.add(new ListitemOrderItem("Drinks", "Booze", 2));
-        sampleOrder.add(new ListitemOrderItem("Food"  , "Grub" , 5));
+        final ExpandableListView expandableListView
+            = (ExpandableListView) getView().findViewById(R.id.service_active_orders_list);
 
-        final ListView listView = (ListView) getView().findViewById(R.id.orders_list);
-        adapter = new OrdersArrayAdapter(getActivity(), new ArrayList<Order>(), this);
-        adapter.addItem(new Order(sampleOrder, sessionManager.getUID(), "4"));
-        adapter.addItem(new Order(sampleOrder, sessionManager.getUID(), "5"));
-        listView.setAdapter(adapter);
-        listView.setOnItemClickListener(new AdapterView.OnItemClickListener()
-        {
-            @Override
-            public void onItemClick(AdapterView<?> adapterView, View view, int index, long l)
-            {
-                adapter.setSelectedItem(index, view);
-            }
-        });
+        serviceActiveOrderListAdapter = new ServiceActiveOrderListAdapter(getActivity());
 
+        expandableListView.setAdapter(serviceActiveOrderListAdapter);
     }
 
     @Override
@@ -114,16 +93,12 @@ public abstract class ServiceListFragment extends Fragment
         switch (item.getItemId())
         {
             case R.id.action_add:
-                showAddOrderDialogFragment(false);
                 return true;
             case R.id.action_view:
-                viewOrderFragmentListener.onView(adapter.getSelectedItemIndex());
                 return true;
             case R.id.action_edit:
-                showAddOrderDialogFragment(true);
                 return true;
             case R.id.action_delete:
-                adapter.removeSelectedItem();
                 return true;
             default:
                 return super.onOptionsItemSelected(item);
@@ -131,7 +106,7 @@ public abstract class ServiceListFragment extends Fragment
     }
 
 
-    @Override
+    /*@Override
     public void onDialogPositiveClick(DialogFragment dialog,
                                       ArrayList<ListitemOrderItem> newOrder,
                                       int orderIndex)
@@ -157,5 +132,5 @@ public abstract class ServiceListFragment extends Fragment
 
         dialog.setTargetFragment(this, 0);
         dialog.show(getFragmentManager(), "AddOrderDialogFragment");
-    }
+    }*/
 }

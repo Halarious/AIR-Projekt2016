@@ -4,13 +4,13 @@
                 android:layout_height="match_parent">
 
     <include
-        android:id="@+id/toolbar_detailed_view"
+        android:id="@+id/toolbar_client_view"
         layout="@layout/toolbar_main"/>
 
-    <android.support.v4.view.ViewPager
-        xmlns:android="http://schemas.android.com/apk/res/android"
-        android:id="@+id/detailed_view_pager"
+    <FrameLayout
+        android:id="@+id/client_fragment_container"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_below="@id/toolbar_detailed_view"/>
+        android:layout_below="@+id/toolbar_client_view"/>
+
 </RelativeLayout>

@@ -17,18 +17,16 @@ import android.widget.ArrayAdapter;
 import android.widget.ListView;
 import android.widget.Toast;
 
-import java.util.ArrayList;
 
 import hr.foi.air.international.servemepls.R;
+import hr.foi.air.international.servemepls.helpers.DrawerInterface;
 import hr.foi.air.international.servemepls.helpers.SessionManager;
-import hr.foi.air.international.servemepls.models.ListitemOrderItem;
 
 
 public class MainActivity extends AppCompatActivity
                           implements FragmentManager.OnBackStackChangedListener,
-                                     ClientFragmentQR.ClientFragmentQRListener,
-                                     ClientListFragment.ClientListListener,
-                                     ServiceListFragment.ViewOrderFragmentListener
+                                     ServiceListFragment.ViewOrderFragmentListener,
+                                     DrawerInterface
 {
     private Toolbar customActionBar;
 
@@ -37,8 +35,6 @@ public class MainActivity extends AppCompatActivity
     private ArrayAdapter<String>  drawerAdapter;
 
     private SessionManager sessionManager;
-
-    private Fragment fragment;
 
     @Override
     protected void onCreate(Bundle savedInstanceState)
@@ -52,9 +48,9 @@ public class MainActivity extends AppCompatActivity
         sessionManager = new SessionManager(getApplicationContext());
 
         createAndSetupActionBar();
-
         createAndSetupDrawer();
 
+        Fragment fragment;
         if(sessionManager.isAdmin())
         {
             //Fragment fragment = new ClientFragmentQR();
@@ -65,12 +61,15 @@ public class MainActivity extends AppCompatActivity
             fragment = new ServiceListFragmentAdmin();
         }
         exchangeFragment(fragment);
+
+        Intent intent = new Intent(MainActivity.this, ServiceOrdersActivity.class);
+        startActivity(intent);
     }
 
     @Override
     protected void onDestroy()
     {
-        //todo: I am not sure when the onDestroy methond is being called exactly,
+        //todo: I am not sure when the onDestroy method is being called exactly,
         //      this might not be the correct way to handle logout at exit
         sessionManager.clearPreferences();
         super.onDestroy();
@@ -94,6 +93,10 @@ public class MainActivity extends AppCompatActivity
                 return true;
             case R.id.action_settings:
                 return true;
+            case R.id.action_logout:
+                sessionManager.clearPreferences();
+                //todo Figure out refresh
+                return true;
             default:
                 return super.onOptionsItemSelected(item);
         }    }
@@ -113,25 +116,6 @@ public class MainActivity extends AppCompatActivity
     }
 
     @Override
-    public void onPlaceOrder(ArrayList<ListitemOrderItem> order)
-    {
-        Fragment fragment = new ClientConfirmationFragment();
-
-        Bundle bundle = new Bundle();
-        bundle.putSerializable("Order", order);
-        fragment.setArguments(bundle);
-
-        exchangeFragment(fragment);
-    }
-
-    @Override
-    public void onQRScanned(String QRContent)
-    {
-        Fragment fragment = new ClientListFragment();
-        exchangeFragment(fragment);
-    }
-
-    @Override
     public void onView(int selectedIndex)
     {
         Intent intent = new Intent(MainActivity.this,
@@ -143,19 +127,30 @@ public class MainActivity extends AppCompatActivity
 
     private void addFragment(Fragment fragment)
     {
+        String backStateName = fragment.getClass().getSimpleName();
+
         FragmentTransaction fragmentTransaction = getSupportFragmentManager().beginTransaction();
         fragmentTransaction.setCustomAnimations(android.support.v7.appcompat.R.anim.abc_slide_in_top,
-                android.support.v7.appcompat.R.anim.abc_slide_in_bottom);
-        fragmentTransaction.add(R.id.fragment_container, fragment).addToBackStack(null).commit();
+                                                android.support.v7.appcompat.R.anim.abc_slide_in_bottom,
+                                                android.support.v7.appcompat.R.anim.abc_popup_enter,
+                                                android.support.v7.appcompat.R.anim.abc_popup_exit);
+        fragmentTransaction.add(R.id.main_fragment_container, fragment, backStateName)
+                .commit();
     }
 
-    //todo: Check the difference between add and replace. This is used for refresh
+    //todo: Check the difference between add and replace. This is used for refresh right now
     private void exchangeFragment(Fragment fragment)
     {
+        String backStateName = fragment.getClass().getSimpleName();
+
         FragmentTransaction fragmentTransaction = getSupportFragmentManager().beginTransaction();
         fragmentTransaction.setCustomAnimations(android.support.v7.appcompat.R.anim.abc_slide_in_top,
-                android.support.v7.appcompat.R.anim.abc_slide_in_bottom);
-        fragmentTransaction.replace(R.id.fragment_container, fragment).commit();
+                                                android.support.v7.appcompat.R.anim.abc_slide_in_bottom,
+                                                android.support.v7.appcompat.R.anim.abc_popup_enter,
+                                                android.support.v7.appcompat.R.anim.abc_popup_exit);
+        fragmentTransaction.replace(R.id.main_fragment_container, fragment, backStateName)
+                .addToBackStack(backStateName)
+                .commit();
     }
 
     private void createAndSetupActionBar()
@@ -164,14 +159,25 @@ public class MainActivity extends AppCompatActivity
         setSupportActionBar(customActionBar);
     }
 
+    @Override
+    public void onDrawerRegister()
+    {
+        Intent intent = new Intent(MainActivity.this, RegisterActivity.class);
+        startActivity(intent);
+    }
+
+    @Override
+    public void onDrawerPower()
+    {
+        sessionManager.setLogin(true, true);
+    }
+
     private void createAndSetupDrawer()
     {
         drawerLayout   = (DrawerLayout) findViewById(R.id.layout_drawer);
         drawerListView = (ListView)findViewById(R.id.navigation_drawer);
 
-        //todo: The menu is just a set of hardcoded strings for now, find the
-        //      best solution to build it
-        String[] drawerMenuItems = { "Register", "Make me powerful" };
+        String[] drawerMenuItems = getResources().getStringArray(R.array.drawer_strings);
         drawerAdapter = new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, drawerMenuItems);
         drawerListView.setAdapter(drawerAdapter);
 
@@ -183,19 +189,12 @@ public class MainActivity extends AppCompatActivity
                 String selection = adapterView.getItemAtPosition(position).toString();
                 Toast.makeText(MainActivity.this, selection,
                                                   Toast.LENGTH_SHORT).show();
-                switch(selection)
-                {
-                    case "Register":
-                        Intent intent = new Intent(MainActivity.this, RegisterActivity.class);
-                        startActivity(intent);
-                        break;
-                    case "Make me powerful":
-                        sessionManager.setLogin(true, true);
-                        addFragment(fragment);
-                        break;
-                    default:
-                        break;
-                }
+
+                if(selection.equals(getString(R.string.drawer_register)))
+                        onDrawerRegister();
+                else if(selection.equals(getString(R.string.drawer_power)))
+                        onDrawerPower();
+
             }
         });
     }

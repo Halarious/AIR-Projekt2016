@@ -1,27 +1,38 @@
 <resources>
-    <string name="app_name">ServeMePls</string>
+    <string name="app_name"                     >ServeMePls</string>
 
-    <string name="drawer_open">Open navigation drawer</string>
-    <string name="drawer_close">Close navigation drawer</string>
+    <string name="drawer_open"                  >Open navigation drawer</string>
+    <string name="drawer_close"                 >Close navigation drawer</string>
 
-    <string name="placeholder">Placeholder</string>
-    <string name="action_settings">Settings</string>
+    <string name="drawer_register"              >Register</string>
+    <string name="drawer_power"                 >Make me powerful!</string>
+    <string-array name="drawer_strings">
+        <item>@string/drawer_register</item>
+        <item>@string/drawer_power</item>
+    </string-array>
 
-    <string name="hint_email">Email</string>
-    <string name="hint_password">Password</string>
-    <string name="hint_name">Fullname</string>
-    <string name="btn_login">LOGIN</string>
-    <string name="btn_register">REGISTER</string>
-    <string name="btn_link_to_register">Not a member? Sign up now.</string>
-    <string name="btn_link_to_login">Already registred! Login Me.</string>
-    <string name="welcome">Welcome</string>
-    <string name="btn_logout">LOGOUT</string>
-    <string name="name">Fullname</string>
+    <string name="tab_1"                        >Active orders</string>
+    <string name="tab_my_orders"                >Pending requests</string>
+    <string name="tab_2"                        >Completed orders</string>
 
-    <string name="add_order_dialog_positive">Okay</string>
-    <string name="add_order_dialog_negative">Cancel</string>
+    <string name="placeholder"                  >Placeholder</string>
+    <string name="action_settings"              >Settings</string>
 
-    <string name="spinner_no_selection">&lt;No selection&gt;</string>
+    <string name="hint_email"                   >Email</string>
+    <string name="hint_password"                >Password</string>
+    <string name="hint_name"                    >Fullname</string>
+    <string name="btn_login"                    >LOGIN</string>
+    <string name="btn_register"                 >REGISTER</string>
+    <string name="btn_link_to_register"         >Not a member? Sign up now.</string>
+    <string name="btn_link_to_login"            >Already registred! Login Me.</string>
+    <string name="welcome"                      >Welcome</string>
+    <string name="btn_logout"                   >LOGOUT</string>
+    <string name="name"                         >Fullname</string>
 
-    <string name="fragment_client_ScanPrompt">Scan table QR code</string>
+    <string name="add_order_dialog_positive"    >Okay</string>
+    <string name="add_order_dialog_negative"    >Cancel</string>
+
+    <string name="spinner_no_selection"         >&lt;No selection&gt;</string>
+
+    <string name="fragment_client_ScanPrompt"   >Scan table QR code</string>
 </resources>

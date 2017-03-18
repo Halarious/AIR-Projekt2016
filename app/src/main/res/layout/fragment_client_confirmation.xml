@@ -6,4 +6,9 @@
                 android:paddingRight="1dp"
                 android:background="#2F4F4F">
 
+    <Button
+        android:id="@+id/button_confirm_order"
+        android:layout_width="match_parent"
+        android:layout_height="50dp"
+        android:layout_alignParentBottom="true"/>
 </RelativeLayout>

@@ -14,25 +14,25 @@ import android.widget.Button;
 import android.widget.ListView;
 
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
 
 import hr.foi.air.international.servemepls.R;
 import hr.foi.air.international.servemepls.helpers.ClientListAdapter;
+import hr.foi.air.international.servemepls.helpers.ClientOrderHelper;
 import hr.foi.air.international.servemepls.models.AvailableItem;
 import hr.foi.air.international.servemepls.models.ListitemOrderItem;
 
 public class ClientListFragment extends Fragment
-                                implements ClientListAdapter.ClientListListener
 {
     public interface ClientListListener
     {
         void onPlaceOrder(ArrayList<ListitemOrderItem> order);
     }
 
+    public static final String TAG = ClientListFragment.class.getSimpleName();
+
     private Context            context;
     private Menu               actionBar;
-    private ClientListAdapter  adapter;
+    private ClientListAdapter  clientListAdapter;
     private ClientListListener clientListListener;
 
     @Override
@@ -44,8 +44,9 @@ public class ClientListFragment extends Fragment
             clientListListener = (ClientListListener) context;
         } catch (ClassCastException e)
         {
+
             throw new ClassCastException(context.toString()
-                    + " must implement NoticeDialogListener");
+                    + " must implement ClientListListener");
         }
         super.onAttach(context);
     }
@@ -53,36 +54,21 @@ public class ClientListFragment extends Fragment
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState)
     {
-        //todo: Test data, this should come from the database. Implement
+        //todo: Test data, this should come from the database, or bundle
+        //      parse here and save (after sort) in internal DB for recovery purposes.
+        //      Actually also consider if this can be pre-sorted on the server or something
         ArrayList<AvailableItem> data = new ArrayList<>();
         data.add(new AvailableItem("Booze", 1));
         data.add(new AvailableItem("Grub", 0));
         data.add(new AvailableItem("Booze2", 1));
         data.add(new AvailableItem("Grub2", 0));
         data.add(new AvailableItem("Booze3", 1));
-        super.onCreate(savedInstanceState);
 
-        //todo: Super horrible, improve this
-        Collections.sort(data, new Comparator<AvailableItem>() {
-            public int compare(AvailableItem first_operand, AvailableItem second_operand) {
-                return first_operand.category < second_operand.category ?
-                        -1 : 1;
-            }
-        });
+        clientListAdapter = new ClientListAdapter(getActivity(), data);
 
-        adapter = new ClientListAdapter(getActivity(), data, this);
-        adapter.addSeparatorItem(0, new AvailableItem());
-        for(int index = 1; index < data.size(); ++index)
-        {
-            if( ((index+1) != data.size()) &&
-                (data.get(index).category != data.get(index+1).category)
-              )
-            {
-                adapter.addSeparatorItem(index+1, new AvailableItem());
-                ++index;
-            }
-        }
         setHasOptionsMenu(true);
+
+        super.onCreate(savedInstanceState);
     }
 
     @Nullable
@@ -100,7 +86,7 @@ public class ClientListFragment extends Fragment
         super.onActivityCreated(savedInstanceState);
 
         ListView listView = (ListView) getView().findViewById(R.id.orders_list);
-        listView.setAdapter(adapter);
+        listView.setAdapter(clientListAdapter);
         listView.setOnItemClickListener(new AdapterView.OnItemClickListener()
         {
             @Override
@@ -115,16 +101,25 @@ public class ClientListFragment extends Fragment
             @Override
             public void onClick(View view)
             {
-                ArrayList<ListitemOrderItem> order = adapter.getSelectedData();
+                ArrayList<ListitemOrderItem> order = clientListAdapter.getSelectedData();
                 clientListListener.onPlaceOrder(order);
             }
         });
     }
 
     @Override
+    public void onDestroy()
+    {
+        ClientOrderHelper.getInstance().clearOrder();
+        super.onDestroy();
+    }
+
+    @Override
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater)
     {
         this.actionBar = menu;
-        super.onCreateOptionsMenu(menu, inflater);
+
+        inflater.inflate(R.menu.menu_client, menu);
+        menu.findItem(R.id.action_place_order).setVisible(true);
     }
 }

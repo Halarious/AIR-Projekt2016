@@ -45,8 +45,8 @@ public class DetailedViewActivity extends AppCompatActivity
         sampleOrder2.add(new ListitemOrderItem("Drinks2", "Booze2", 4));
         sampleOrder2.add(new ListitemOrderItem("Food2"  , "Grub2" , 7));
         ArrayList<Order> orders = new ArrayList<Order>();
-        orders.add(new Order(sampleOrder, sessionManager.getUID()));
-        orders.add(new Order(sampleOrder2, "1a"));
+        orders.add(new Order(sampleOrder, sessionManager.getUID(), "1"));
+        orders.add(new Order(sampleOrder2, "1a", "2"));
 
         viewPager = (ViewPager) findViewById(R.id.detailed_view_pager);
 
@@ -90,6 +90,5 @@ public class DetailedViewActivity extends AppCompatActivity
                 return true;
         }
         return super.onOptionsItemSelected(item);
-
     }
 }

@@ -33,7 +33,7 @@ public class DetailedViewPageAdapter extends FragmentStatePagerAdapter
         Order order = orders.get(position);
         arguments.putSerializable(DetailedOrderFragment.ORDER, order);
         arguments.putBoolean     (DetailedOrderFragment.EDITABLE,
-                                  (sessionManager.isAdmin() ||
+                                  (sessionManager.isAdmin()                     ||
                                    sessionManager.getUID().equals(order.UID))
                                  );
 
